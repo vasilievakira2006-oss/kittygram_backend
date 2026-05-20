@@ -1,0 +1,405 @@
+{
+  "info": {
+    "_postman_id": "9d843fd0-9d09-44fd-ad7f-2a5b054de309",
+    "name": "Kittygram курсовая",
+    "description": "Набор проверочных запросов к REST API Kittygram. Перед запуском поднять бэкенд на http://127.0.0.1:8000.\n\nПеременная коллекции `baseUrl` (по умолчанию http://127.0.0.1:8000) и `authToken` (заполняется автоматически тестом из запроса \"Получение токена\").",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1 - Регистрация пользователя",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"kotik_lover\",\n  \"password\": \"qwerty123456\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/users/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "users", ""]
+        },
+        "description": "Регистрация нового пользователя через Djoser. Ожидается 201 Created с возвращённым username и id."
+      },
+      "response": [
+        {
+          "name": "201 Created",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"username\": \"kotik_lover\", \"password\": \"qwerty123456\"}" },
+            "url": { "raw": "{{baseUrl}}/api/users/", "host": ["{{baseUrl}}"], "path": ["api", "users", ""] }
+          },
+          "status": "Created",
+          "code": 201,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"email\": \"\",\n  \"username\": \"kotik_lover\",\n  \"id\": 7\n}"
+        }
+      ]
+    },
+    {
+      "name": "2 - Получение токена",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const res = pm.response.json();",
+              "if (res.auth_token) {",
+              "    pm.collectionVariables.set('authToken', res.auth_token);",
+              "    pm.test('Token saved to collection variable', () => pm.expect(res.auth_token).to.be.a('string'));",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"kotik_lover\",\n  \"password\": \"qwerty123456\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/token/login/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "token", "login", ""]
+        },
+        "description": "Получение токена аутентификации. Тест автоматически сохраняет полученный токен в переменную коллекции `authToken`, и она подставляется в Authorization-заголовок остальных запросов."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"username\": \"kotik_lover\", \"password\": \"qwerty123456\"}" },
+            "url": { "raw": "{{baseUrl}}/api/token/login/", "host": ["{{baseUrl}}"], "path": ["api", "token", "login", ""] }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"auth_token\": \"4d4fbedbed005120b82c0f94e5578497539c3be1\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "3 - Создание котика",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Token {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Автобус\",\n  \"color\": \"#FF8C00\",\n  \"birth_year\": 2020\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cats/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cats", ""]
+        },
+        "description": "Создание нового котика. Владелец проставляется автоматически из токена через `perform_create`."
+      },
+      "response": [
+        {
+          "name": "201 Created",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Token {{authToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"name\": \"Автобус\", \"color\": \"#FF8C00\", \"birth_year\": 2020}" },
+            "url": { "raw": "{{baseUrl}}/api/cats/", "host": ["{{baseUrl}}"], "path": ["api", "cats", ""] }
+          },
+          "status": "Created",
+          "code": 201,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"id\": 23,\n  \"name\": \"Автобус\",\n  \"color\": \"darkorange\",\n  \"birth_year\": 2020,\n  \"owner\": 7,\n  \"owner_username\": \"kotik_lover\",\n  \"age\": 6,\n  \"image\": null\n}"
+        }
+      ]
+    },
+    {
+      "name": "4 - Список котиков без токена",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/cats/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cats", ""]
+        },
+        "description": "Проверка, что просмотр списка котиков доступен и гостям (после внедрения IsAuthenticatedOrReadOnly + IsOwnerOrAdminOrReadOnly)."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/cats/", "host": ["{{baseUrl}}"], "path": ["api", "cats", ""] }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"count\": 22,\n  \"next\": \"http://127.0.0.1:8000/api/cats/?page=2\",\n  \"previous\": null,\n  \"results\": [\n    {\n      \"id\": 22,\n      \"name\": \"крекер\",\n      \"color\": \"darkorange\",\n      \"birth_year\": 2019,\n      \"owner\": 7,\n      \"owner_username\": \"kotik_lover\",\n      \"age\": 7,\n      \"image\": \"http://127.0.0.1:8000/media/cats/images/temp_qSkI2qU.jpeg\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "5 - Создание подборки",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Token {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Самые милые котики\",\n  \"description\": \"Только милота\",\n  \"category\": \"cute\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/collections/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "collections", ""]
+        },
+        "description": "Создание подборки. Категория должна быть из списка funny / cute / sleepy / active / grumpy / other."
+      },
+      "response": [
+        {
+          "name": "201 Created",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Token {{authToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"name\": \"Самые милые котики\", \"description\": \"Только милота\", \"category\": \"cute\"}" },
+            "url": { "raw": "{{baseUrl}}/api/collections/", "host": ["{{baseUrl}}"], "path": ["api", "collections", ""] }
+          },
+          "status": "Created",
+          "code": 201,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"id\": 5,\n  \"name\": \"Самые милые котики\",\n  \"description\": \"Только милота\",\n  \"category\": \"cute\",\n  \"owner\": 7,\n  \"owner_username\": \"kotik_lover\",\n  \"cats\": [],\n  \"cats_count\": 0,\n  \"views_count\": 0,\n  \"likes_count\": 0,\n  \"is_liked\": false,\n  \"created_at\": \"2026-05-20T08:55:02.986653Z\",\n  \"updated_at\": \"2026-05-20T08:55:02.986667Z\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "6 - Список подборок без токена",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/collections/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "collections", ""]
+        },
+        "description": "Просмотр подборок гостем — доступен без авторизации."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/collections/", "host": ["{{baseUrl}}"], "path": ["api", "collections", ""] }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"count\": 3,\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"id\": 4,\n      \"name\": \"Самые милые котики\",\n      \"description\": \"Только милота\",\n      \"category\": \"cute\",\n      \"owner_username\": \"kotik_lover\",\n      \"cats_count\": 0,\n      \"likes_count\": 0\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "7 - Добавление котика в подборку",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Token {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cat_id\": 23\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/collections/5/add_cat/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "collections", "5", "add_cat", ""]
+        },
+        "description": "Добавление существующего котика в собственную подборку. Возвращает 403, если пытаться добавить в чужую."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Token {{authToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"cat_id\": 23}" },
+            "url": { "raw": "{{baseUrl}}/api/collections/5/add_cat/", "host": ["{{baseUrl}}"], "path": ["api", "collections", "5", "add_cat", ""] }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"detail\": \"Котик добавлен в подборку\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "8 - Фильтр подборок по категории",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/collections/?category=cute",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "collections", ""],
+          "query": [{ "key": "category", "value": "cute" }]
+        },
+        "description": "Проверка фильтрации списка подборок по категории через query-параметр."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/collections/?category=cute", "host": ["{{baseUrl}}"], "path": ["api", "collections", ""], "query": [{ "key": "category", "value": "cute" }] }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"count\": 2,\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    { \"id\": 5, \"name\": \"Самые милые котики\", \"category\": \"cute\" }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "9 - Пагинация (страница 2)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/cats/?page=2",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cats", ""],
+          "query": [{ "key": "page", "value": "2" }]
+        },
+        "description": "Проверка постраничного вывода. По умолчанию page_size = 9."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/cats/?page=2", "host": ["{{baseUrl}}"], "path": ["api", "cats", ""], "query": [{ "key": "page", "value": "2" }] }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"count\": 22,\n  \"next\": \"http://127.0.0.1:8000/api/cats/?page=3\",\n  \"previous\": \"http://127.0.0.1:8000/api/cats/\",\n  \"results\": []\n}"
+        }
+      ]
+    },
+    {
+      "name": "10 - Отрицательный кейс: birth_year в будущем",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Token {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Кот из будущего\",\n  \"color\": \"#FF0000\",\n  \"birth_year\": 2030\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cats/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cats", ""]
+        },
+        "description": "Отрицательный кейс: сервер должен вернуть 400 Bad Request с сообщением о валидации birth_year."
+      },
+      "response": [
+        {
+          "name": "400 Bad Request",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Token {{authToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"name\": \"Кот из будущего\", \"color\": \"#FF0000\", \"birth_year\": 2030}" },
+            "url": { "raw": "{{baseUrl}}/api/cats/", "host": ["{{baseUrl}}"], "path": ["api", "cats", ""] }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"birth_year\": [\n    \"Ensure this value is less than or equal to 2026.\"\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "11 - Отрицательный кейс: попытка изменить чужого котика",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Token {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Перехват\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cats/1/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cats", "1", ""]
+        },
+        "description": "PATCH на котика, владельцем которого не является текущий пользователь. Permission `IsOwnerOrAdminOrReadOnly` возвращает 403 Forbidden."
+      },
+      "response": [
+        {
+          "name": "403 Forbidden",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Token {{authToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"name\": \"Перехват\"}" },
+            "url": { "raw": "{{baseUrl}}/api/cats/1/", "host": ["{{baseUrl}}"], "path": ["api", "cats", "1", ""] }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"detail\": \"У вас недостаточно прав для выполнения данного действия.\"\n}"
+        }
+      ]
+    }
+  ]
+}
